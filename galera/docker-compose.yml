@@ -1,0 +1,47 @@
+version: '3.5'
+services:
+  dbcluster:
+    image: toughiq/mariadb-cluster
+    volumes:
+      - vol_db:/var/lib/mysql
+    networks:
+      - dbnetwork
+    ports:
+      - 3306:3306
+    environment:
+      - DB_SERVICE_NAME=dbcluster
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=mydb
+      - MYSQL_USER=mydbuser
+      - MYSQL_PASSWORD=mydbpass
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == worker
+
+  dblb:
+    image: toughiq/maxscale
+    networks:
+      - dbnetwork
+    ports:
+      - 33061:3306
+    environment:
+      - DB_SERVICE_NAME=dbcluster
+      - ENABLE_ROOT_USER=1
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.manager1 == true
+
+volumes:
+  vol_db:
+    driver: local
+
+networks:
+  dbnetwork:
+    external: true

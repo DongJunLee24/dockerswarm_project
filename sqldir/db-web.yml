@@ -1,0 +1,27 @@
+version: "2"
+services:
+  mariadb: 
+      image: mariadb/server:latest
+      container_name: mydb
+      environment: 
+          - MYSQL_ROOT_PASSWORD=test123
+      restart: always
+      volumes:
+          - /docker/database:/var/lib/mysql
+          - /docker/database/conf:/etc/mysql/conf.d
+      ports:
+          - 3306:3306
+
+  phpmyadmin: 
+      image: phpmyadmin/phpmyadmin:latest
+      container_name: myadmin
+      environment: 
+          - PMA_ARBITRARY=1
+          - PMA_HOST=현재OS호스트명
+      restart: always
+      ports:
+          - 80:80
+      volumes:
+          - /docker/phpmyadmin/sessions
+      links:
+          - mariadb
